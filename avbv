@@ -1,0 +1,1844 @@
+local drawhelper = loadstring(game:HttpGet("https://raw.githubusercontent.com/gggasdsafhgdsasaddsagdsds-oss/gfgghhh/refs/heads/main/dsadafg"))()
+
+local RunService = game:GetService("RunService")
+local Teams = game:GetService("Teams")
+local Players = game:GetService("Players")
+local Camera = workspace.CurrentCamera
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local InputService = game:GetService("UserInputService")
+local dwLocalPlayer = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local RecieverRemote = game:GetService('ReplicatedStorage').RemoteEvent
+local Reciever = RecieverRemote.OnClientEvent
+local require = getrenv().shared and getrenv().shared.require
+
+local moduleCache
+for i, v in getgc(true) do
+    if type(v) == "table" and rawget(v, "ScreenCull") and rawget(v, "NetworkClient") then
+        moduleCache = v
+        break
+    end
+end
+
+local modules = {}
+for name, data in moduleCache do
+    if data then
+        modules[name] = data.module
+    end
+end
+
+local hasMouseMoveRel = type(mousemoverel) == 'function'
+if not hasMouseMoveRel then
+    game:GetService('StarterGui'):SetCore('SendNotification', {
+        Title = 'Bbot.Rape',
+        Text = 'YOUR SHIT EXECUTOR DONT HAVE MOUSEMOVEREL LMMMAOOO',
+        Duration = 6,
+    })
+end
+
+if not require then
+    return game:GetService('Players').LocalPlayer:Kick('FFlagDebugRunParallelLuaOnMainThread not found')
+end
+
+--modules
+local effects = modules.Effects
+local vector = modules.VectorLib
+local physics = modules.PhysicsLib
+local raycastLib = modules.Raycast
+local cframeLib = modules.CFrameLib
+local recoil = modules.RecoilSprings
+local network = modules.NetworkClient
+local screenCull = modules.ScreenCull
+local modifyData = modules.ModifyData
+local bulletcheck = modules.BulletCheck
+local audioSystem = modules.AudioSystem
+local bulletObject = modules.BulletObject
+local charObject = modules.CharacterObject
+local skinCaseUtils = modules.SkinCaseUtils
+local firearmObject = modules.FirearmObject
+local desktopHitBox = modules.DesktopHitBox
+local cameraObject = modules.MainCameraObject
+local playerRegistry = modules.PlayerRegistry
+local publicSettings = modules.PublicSettings
+local playerDataUtils = modules.PlayerDataUtils
+local cameraInterface = modules.CameraInterface
+local contentDatabase = modules.ContentDatabase
+local hudnotify = modules.HudNotificationConfig
+local charInterface = modules.CharacterInterface
+local hudScopeInterface = modules.HudScopeInterface
+local unscaledScreenGui = modules.UnscaledScreenGui
+local replicationObject = modules.ReplicationObject
+local thirdPersonObject = modules.ThirdPersonObject
+local weaponObject = modules.WeaponControllerObject
+local playerClient = modules.PlayerDataClientInterface
+local roundSystem = modules.RoundSystemClientInterface
+local weaponInterface = modules.WeaponControllerInterface
+local replicationInterface = modules.ReplicationInterface
+local crosshairsInterface = modules.HudCrosshairsInterface
+local math_random = math.random
+--end of modukles
+
+local GlobalESPGui = Instance.new("ScreenGui")
+GlobalESPGui.Name = "Ahh_ihateniggers"
+GlobalESPGui.IgnoreGuiInset = true
+GlobalESPGui.Parent = CoreGui
+
+local tau = math.pi * 2
+local quarter = math.pi * 0.5
+
+local cross1 = drawing.new("Line")
+local cross2 = drawing.new("Line")
+local cross3 = drawing.new("Line")
+local cross4 = drawing.new("Line")
+local crossdot = drawing.new("Line")
+
+local Visuals = {
+    Storage = workspace.Terrain,
+    TracerBeams = {},
+}
+
+local Settings = {
+    Aimbot = {
+        Enabled = false,
+        HitPart = "Head",
+        WallCheck = false,
+        AutoTargetSwitch = false,
+        MaxDistance = { Enabled = false, Value = 500 },
+        Easing = { Strength = 0.1, Sensitivity = Instance.new("NumberValue") }
+    },
+
+    FOV = {
+        Enabled = false,
+        FollowGun = false,
+        Radius = 50,
+        Circle = drawing.new("Circle"),
+        OutlineCircle = drawing.new("Circle"),
+        Filled = false,
+        FillColor = Color3.fromRGB(0, 0, 0),
+        FillTransparency = 0.2,
+        OutlineColor = Color3.fromRGB(255, 255, 255),
+        OutlineTransparency = 1
+    },
+
+    ESP = {
+        Enabled = false,
+        VisibilityCheck = false,
+        MaxDistance = { Enabled = false, Value = 500 },
+        Features = {
+            Box = {
+                Enabled = false,
+                GradientEnabled = false,
+                GradientRotation = 90,
+                Color1 = Color3.fromRGB(170, 0, 255),
+                Color2 = Color3.fromRGB(0, 255, 255),
+                OutlineColor = Color3.fromRGB(0, 0, 0),
+                Thickness = 0.5 
+            },
+
+            Highlight = {
+                Enabled = false,
+                VisibilityCheck = false,
+                FillColor = Color3.fromRGB(150, 255, 249),
+                OccludedFillColor = Color3.fromRGB(150, 255, 249),
+                OutlineColor = Color3.fromRGB(150, 255, 249),
+                FillTransparency = 0.7,
+                OutlineTransparency = 0.5
+            },
+
+            Crosshair = {
+                Enabled = false,
+                FollowRecoil = false,
+                XSpace = 8,
+                YSpace = 8,
+                XSize = 5,
+                YSize = 5,
+                SpinSpeed = 0,
+                Color = Color3.fromRGB(255, 255, 255),
+                Thickness = 1
+            }
+        }
+    },
+
+    BulletTracers = {
+        Local = {
+            Enabled = true,
+            ColorStart = Color3.fromRGB(0, 255, 255),
+            ColorEnd = Color3.fromRGB(255, 0, 255),
+            Lifetime = 1,
+            Texture = 'Sad Spongebob',
+        },
+        Enemy = {
+            Enabled = true,
+            ColorStart = Color3.fromRGB(255, 0, 0),
+            ColorEnd = Color3.fromRGB(255, 0, 0),
+            Lifetime = 1,
+            Texture = 'Default',
+        },
+        UseThirdPersonMuzzle = false,
+        UseNewOrigin = false,
+        Textures = {
+            ['Default'] = 'rbxassetid://446111271',
+            ['Sad Spongebob'] = 'rbxassetid://10729455634',
+            ['POW!'] = 'rbxassetid://4125844058',
+            ['Nothing'] = '',
+        },
+    },
+
+    GunMods = {
+        NoRecoil = false,
+        NoSpread = false,
+        InstantReload = false,
+        NoScopeMovement = false,
+        CrosshairLock = false
+    }
+}
+
+function Visuals:RenderBulletTracer(Origin, Target, Lifetime, Color, Color2)
+    local BeamStorage = Instance.new('Folder')
+    BeamStorage.Name = 'BulletTracer'
+    BeamStorage.Parent = self.Storage
+
+    local Start = Instance.new('Part')
+    Start.Position = Origin
+    Start.Parent = BeamStorage
+    Start.Transparency = 1
+    Start.CanCollide = false
+    Start.Anchored = true
+    Start.Size = Vector3.new(0, 0, 0)
+
+    local End = Start:Clone()
+    End.Parent = BeamStorage
+    End.Position = Target
+
+    local A0 = Instance.new('Attachment')
+    A0.Parent = Start
+
+    local A1 = Instance.new('Attachment')
+    A1.Parent = End
+
+    local TextureName = Settings.BulletTracers.Local.Texture
+    local BeamWidth = TextureName == 'Nothing' and 0.075 or 0.9
+
+    local Beam = Instance.new('Beam')
+    Beam.Parent = BeamStorage
+    Beam.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color),
+        ColorSequenceKeypoint.new(1, Color2),
+    })
+    Beam.Transparency = NumberSequence.new(1)
+    Beam.Width0 = BeamWidth
+    Beam.Width1 = BeamWidth
+    Beam.Attachment0 = A0
+    Beam.Attachment1 = A1
+    Beam.FaceCamera = true
+    Beam.Texture = Settings.BulletTracers.Textures[TextureName]
+    Beam.TextureSpeed = 1 + math.random()
+    Beam.TextureLength = 4
+    Beam.TextureMode = Enum.TextureMode.Static
+    Beam.LightEmission = 10
+
+    task.spawn(function()
+        for Transparency = 1, 0, -1 / 30 do
+            Beam.Transparency = NumberSequence.new(Transparency)
+            task.wait()
+        end
+    end)
+
+    task.delay(Lifetime, function()
+        for Transparency = 0, 1, 1 / 60 do
+            Beam.Transparency = NumberSequence.new(Transparency)
+            task.wait()
+        end
+        BeamStorage:Destroy()
+    end)
+
+    table.insert(self.TracerBeams, BeamStorage)
+    return Beam
+end
+
+task.spawn(function()
+    while true do
+        task.wait(10)
+        for i = #Visuals.TracerBeams, 1, -1 do
+            local beam = Visuals.TracerBeams[i]
+            if not beam or not beam.Parent then
+                table.remove(Visuals.TracerBeams, i)
+            end
+        end
+    end
+end)
+
+Settings.FOV.Circle.Visible = false
+Settings.FOV.Circle.Filled = Settings.FOV.Filled
+Settings.FOV.Circle.Color = Settings.FOV.FillColor
+Settings.FOV.Circle.Transparency = Settings.FOV.FillTransparency
+Settings.FOV.Circle.Thickness = 0
+Settings.FOV.Circle.Radius = Settings.FOV.Radius
+Settings.FOV.Circle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+Settings.Aimbot.Easing.Sensitivity.Value = Settings.Aimbot.Easing.Strength
+
+Settings.FOV.OutlineCircle.Filled = false
+Settings.FOV.OutlineCircle.Color = Settings.FOV.OutlineColor
+Settings.FOV.OutlineCircle.Transparency = Settings.FOV.OutlineTransparency
+Settings.FOV.OutlineCircle.Thickness = 1
+Settings.FOV.OutlineCircle.Radius = Settings.FOV.Radius
+Settings.FOV.OutlineCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+Settings.FOV.OutlineCircle.Visible = Settings.FOV.Enabled
+
+cross1.Visible = false
+cross1.Color = Settings.ESP.Features.Crosshair.Color
+cross1.Thickness = Settings.ESP.Features.Crosshair.Thickness
+
+cross2.Visible = false
+cross2.Color = Settings.ESP.Features.Crosshair.Color
+cross2.Thickness = Settings.ESP.Features.Crosshair.Thickness
+
+cross3.Visible = false
+cross3.Color = Settings.ESP.Features.Crosshair.Color
+cross3.Thickness = Settings.ESP.Features.Crosshair.Thickness
+
+cross4.Visible = false
+cross4.Color = Settings.ESP.Features.Crosshair.Color
+cross4.Thickness = Settings.ESP.Features.Crosshair.Thickness
+
+crossdot.Visible = false
+crossdot.Color = Settings.ESP.Features.Crosshair.Color
+crossdot.Thickness = Settings.ESP.Features.Crosshair.Thickness
+
+local State = {
+    IsRightClickHeld = false,
+    TargetPart = nil,
+    MousePreload = {
+        Active = false,
+        LastTime = 0,
+        Interval = 5,
+        Connection = nil
+    },
+    InputBeganConnection = nil,
+    InputEndedConnection = nil,
+    RenderSteppedConnection = nil,
+    PlayersToDraw = {},
+    Storage = { 
+        ESPCache = {},
+        TracerBeams = {},
+    }
+}
+
+local aiming = false
+local lastFollowGun = Settings.FOV.FollowGun
+
+local SilentAim = {
+    Enabled = false,
+    HitScan = "Head",
+    ShowFOV = false,
+    Fov = Settings.FOV.Radius
+}
+
+local HitChance = {
+    Head = 50,
+    Torso = 80
+}
+
+local function PassesHitChance(partName)
+    local chance = HitChance[partName] or 100
+    return (math.random(1,100) <= chance)
+end
+
+local function getGunBarrel()
+    local furthestPart = nil
+    local maxZ = -math.huge
+    for _, model in pairs(workspace.Camera:GetChildren()) do
+        if model:IsA("Model") and not string.find(model.Name:lower(), "arm") then
+            for _, part in pairs(model:GetDescendants()) do
+                if part:IsA("BasePart") or part:IsA("MeshPart") then
+                    local pos, vis = Camera:WorldToViewportPoint(part.Position)
+                    if vis and pos.Z > maxZ then
+                        maxZ = pos.Z
+                        furthestPart = part
+                    end
+                end
+            end
+        end
+    end
+    return furthestPart
+end
+
+local function getBarrelLocation()
+    local barrel = getGunBarrel()
+    if barrel then
+        local position, onScreen = Camera:WorldToViewportPoint(barrel.Position)
+        if onScreen then
+            return Vector3.new(position.X, position.Y, position.Z)
+        end
+    end
+    return nil
+end
+
+local function updateCrosshairPos(force)
+    local barrel = Settings.ESP.Features.Crosshair.FollowRecoil and getBarrelLocation()
+    if barrel then barrel = (barrel.Z > 0 and Vector2.new(barrel.X, barrel.Y)); end
+    local middle = barrel or (Camera.ViewportSize * 0.5)
+    local x, y = middle.X, middle.Y
+    local sx = Settings.ESP.Features.Crosshair.XSpace * 0.5
+    local sy = Settings.ESP.Features.Crosshair.YSpace * 0.5
+    local w = Settings.ESP.Features.Crosshair.XSize
+    local h = Settings.ESP.Features.Crosshair.YSize
+    local speed = Settings.ESP.Features.Crosshair.SpinSpeed
+    crossdot.Position = middle
+
+    if speed == 0 or force then
+        cross1.From = Vector2.new(x + sx, y)
+        cross1.To = Vector2.new(x + sx + w, y)
+        cross2.From = Vector2.new(x, y + sy)
+        cross2.To = Vector2.new(x, y + sy + h)
+        cross3.From = Vector2.new(x - sx, y)
+        cross3.To = Vector2.new(x - sx - w, y)
+        cross4.From = Vector2.new(x, y - sy)
+        cross4.To = Vector2.new(x, y - sy - h)
+    else
+        local delta = (os.clock() * speed) % 1
+        local baseangle = delta * tau
+        local a1 = Vector2.new(math.cos(baseangle), math.sin(baseangle))
+        baseangle += quarter
+        local a2 = Vector2.new(math.cos(baseangle), math.sin(baseangle))
+        baseangle += quarter
+        local a3 = Vector2.new(math.cos(baseangle), math.sin(baseangle))
+        baseangle += quarter
+        local a4 = Vector2.new(math.cos(baseangle), math.sin(baseangle))
+        baseangle += quarter
+        cross1.From = a1 * sx + middle
+        cross1.To = a1 * (sx + w) + middle
+        cross2.From = a2 * sy + middle
+        cross2.To = a2 * (sy + h) + middle
+        cross3.From = a3 * sx + middle
+        cross3.To = a3 * (sx + w) + middle
+        cross4.From = a4 * sy + middle
+        cross4.To = a4 * (sy + h) + middle
+    end
+end
+
+local function updateFOVCirclePosition()
+    if not Settings.FOV.Circle or not Settings.FOV.OutlineCircle then return end
+    
+    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    if Settings.FOV.Enabled then
+        if Settings.FOV.FollowGun and not aiming then
+            local barrel = getGunBarrel()
+            if barrel then
+                local position, onScreen = Camera:WorldToViewportPoint(barrel.Position)
+                if onScreen then
+                    local newPosition = Vector2.new(position.X, position.Y)
+                    Settings.FOV.Circle.Position = newPosition
+                    Settings.FOV.OutlineCircle.Position = newPosition
+                    return
+                end
+            end
+        end
+        Settings.FOV.Circle.Position = screenCenter
+        Settings.FOV.OutlineCircle.Position = screenCenter
+    end
+end
+
+local function getPlayers()
+    local entityList = {}
+    for _, team in pairs(workspace.Players:GetChildren()) do
+        for _, player in pairs(team:GetChildren()) do
+            if player:IsA("Model") then
+                table.insert(entityList, player)
+            end
+        end
+    end
+    return entityList
+end
+
+local function isEnemy(player)
+    local localPlayerTeam = Players.LocalPlayer.Team
+    local helmet = player:FindFirstChildWhichIsA("Folder") and player:FindFirstChildWhichIsA("Folder"):FindFirstChildOfClass("MeshPart")
+    if not helmet then return false end
+    local playerColor = helmet.BrickColor.Name
+    if playerColor == "Black" and localPlayerTeam.Name == "Phantoms" then
+        return false
+    elseif playerColor ~= "Black" and localPlayerTeam.Name == "Ghosts" then
+        return false
+    end
+    return true
+end
+
+local function getBodyPart(player, bodyPartName)
+    if bodyPartName then
+        return player:FindFirstChild(bodyPartName)
+    end
+    for _, bodyPart in pairs(player:GetChildren()) do
+        if bodyPart:IsA("BasePart") then
+            local mesh = bodyPart:FindFirstChildOfClass("SpecialMesh")
+            if mesh and mesh.MeshId == "rbxassetid://4049240078" then
+                return bodyPart
+            end
+        end
+    end
+    return nil
+end
+
+local function getHead(player)
+    for _, bodyPart in pairs(player:GetChildren()) do
+        if bodyPart:IsA("BasePart") then
+            local mesh = bodyPart:FindFirstChildOfClass("SpecialMesh")
+            if mesh and mesh.MeshId == "rbxassetid://6179256256" then
+                return bodyPart
+            end
+        end
+    end
+    return nil
+end
+
+local function resolvePart(player, partName)
+    if not player then return nil end
+
+    if partName == "Head" then
+        return getHead(player)
+    elseif partName == "Torso" then
+        return getBodyPart(player) or player:FindFirstChild("Torso") or player:FindFirstChild("UpperTorso")
+    end
+
+    local part = player:FindFirstChild(partName)
+    if part then return part end
+
+    if partName == "Left Arm" then
+        return player:FindFirstChild("LeftUpperArm")
+    elseif partName == "Right Arm" then
+        return player:FindFirstChild("RightUpperArm")
+    elseif partName == "Left Leg" then
+        return player:FindFirstChild("LeftUpperLeg")
+    elseif partName == "Right Leg" then
+        return player:FindFirstChild("RightUpperLeg")
+    end
+
+    return nil
+end
+
+local function getClosestPlayer()
+    local closestPart = nil
+    local shortestDistance = math.huge
+    local screenCenter = Settings.FOV.Circle.Position
+
+    for _, player in pairs(getPlayers()) do
+        if not isEnemy(player) or player:IsDescendantOf(workspace.Ignore.DeadBody) then continue end
+
+        local targetBodyPart = Settings.Aimbot.HitPart == "Head" and getHead(player) or resolvePart(player, "Torso")
+        if targetBodyPart then
+            local partPosition, onScreen = Camera:WorldToViewportPoint(targetBodyPart.Position)
+            if onScreen then
+                local screenPosition = Vector2.new(partPosition.X, partPosition.Y)
+                local distanceToCenter = (screenPosition - screenCenter).Magnitude
+                local distanceToCamera = (targetBodyPart.Position - Camera.CFrame.Position).Magnitude
+                
+                if Settings.Aimbot.MaxDistance.Enabled and distanceToCamera > Settings.Aimbot.MaxDistance.Value then continue end
+
+                local isInFOV = not Settings.FOV.Enabled or distanceToCenter <= Settings.FOV.Circle.Radius
+                
+                if isInFOV then
+                    if distanceToCenter < shortestDistance then
+                        closestPart = targetBodyPart
+                        shortestDistance = distanceToCenter
+                    end
+                end
+            end
+        end
+    end
+    return closestPart
+end
+
+local function safeMouseMoveRel(x, y)
+    pcall(function()
+        mousemoverel(x, y)
+    end)
+end
+
+local function preloadMouse()
+    local currentTime = tick()
+    if currentTime - State.MousePreload.LastTime >= State.MousePreload.Interval then
+        safeMouseMoveRel(0.01, 0.01)
+        State.MousePreload.LastTime = currentTime
+    end
+end
+
+local function startMousePreload()
+    if State.MousePreload.Active then return end
+    State.MousePreload.Active = true
+    State.MousePreload.Connection = RunService.Heartbeat:Connect(preloadMouse)
+end
+
+local function stopMousePreload()
+    if not State.MousePreload.Active then return end
+    State.MousePreload.Active = false
+    if State.MousePreload.Connection then
+        State.MousePreload.Connection:Disconnect()
+        State.MousePreload.Connection = nil
+    end
+end
+
+local function aimAt()
+    if not Settings.Aimbot.Easing.Strength or not State.TargetPart then return end
+
+    local partPosition, onScreen = Camera:WorldToViewportPoint(State.TargetPart.Position)
+    if onScreen then
+        local mouseLocation = UserInputService:GetMouseLocation()
+        local targetMousePosition = Vector2.new(partPosition.X, partPosition.Y)
+        local deltaX = targetMousePosition.X - mouseLocation.X
+        local deltaY = targetMousePosition.Y - mouseLocation.Y
+        local distance = math.sqrt(deltaX^2 + deltaY^2)
+        
+        if distance > 1 then
+            local moveX = deltaX * Settings.Aimbot.Easing.Sensitivity.Value
+            local moveY = deltaY * Settings.Aimbot.Easing.Sensitivity.Value
+            safeMouseMoveRel(moveX, moveY)
+        end
+    end
+end
+
+local function updateSensitivity(newSensitivity)
+    local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(Settings.Aimbot.Easing.Sensitivity, tweenInfo, {Value = newSensitivity})
+    tween:Play()
+end
+
+local function isVisible(targetPart)
+    if Settings.Aimbot.WallCheck then
+        local direction = targetPart.Position - Camera.CFrame.Position
+        local ray = Ray.new(Camera.CFrame.Position, direction.Unit * 1000)
+        local hitPart, _ = workspace:FindPartOnRay(ray, Players.LocalPlayer.Character, false, true)
+        return hitPart == targetPart
+    end
+    return true
+end
+
+local function setFOVEnabled(enabled)
+    Settings.FOV.Enabled = enabled
+    Settings.FOV.Circle.Visible = enabled and Settings.FOV.Filled
+    Settings.FOV.OutlineCircle.Visible = enabled
+end
+
+local function setCrosshairEnabled(enabled)
+    Settings.ESP.Features.Crosshair.Enabled = enabled
+    cross1.Visible = enabled
+    cross2.Visible = enabled
+    cross3.Visible = enabled
+    cross4.Visible = enabled
+    crossdot.Visible = enabled
+    if enabled then
+        updateCrosshairPos(true)
+    end
+end
+
+local function isValidPlayer(player)
+    return player and player.Parent and player:IsDescendantOf(workspace.Players)
+end
+
+local function isVisibleESP(targetPart)
+    if not targetPart then return false end
+    local direction = targetPart.Position - Camera.CFrame.Position
+    local ray = Ray.new(Camera.CFrame.Position, direction.Unit * 1000)
+    local hitPart, _ = workspace:FindPartOnRay(ray, Players.LocalPlayer.Character, false, true)
+    return hitPart == targetPart
+end
+
+local function cacheObject(object)
+    if not State.Storage.ESPCache[object] then
+        local hl = Instance.new("Highlight")
+        hl.Name = "BbotHighlight"
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        hl.Enabled = false
+        hl.Parent = CoreGui
+
+        local outlineFrame = Instance.new("Frame")
+        outlineFrame.Name = "OutlineBox"
+        outlineFrame.BackgroundTransparency = 1
+        outlineFrame.Parent = GlobalESPGui
+        outlineFrame.Visible = false
+        outlineFrame.ZIndex = 1
+
+        local outlineStroke = Instance.new("UIStroke")
+        outlineStroke.Thickness = 3
+        outlineStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        outlineStroke.LineJoinMode = Enum.LineJoinMode.Miter
+        outlineStroke.Color = Color3.new(0,0,0)
+        outlineStroke.Parent = outlineFrame
+
+        local boxFrame = Instance.new("Frame")
+        boxFrame.Name = "GradientBox"
+        boxFrame.BackgroundTransparency = 1
+        boxFrame.Parent = GlobalESPGui
+        boxFrame.Visible = false
+        boxFrame.ZIndex = 2
+
+        local uiStroke = Instance.new("UIStroke")
+        uiStroke.Thickness = 1
+        uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        uiStroke.LineJoinMode = Enum.LineJoinMode.Miter
+        uiStroke.Parent = boxFrame
+
+        local uiGradient = Instance.new("UIGradient")
+        uiGradient.Rotation = 90
+        uiGradient.Parent = uiStroke
+
+        State.Storage.ESPCache[object] = {
+            Highlight = hl,
+            OutlineFrame = outlineFrame,
+            BoxFrame = boxFrame,
+            UIStroke = uiStroke,
+            UIGradient = uiGradient
+        }
+    end
+end
+
+local function uncacheObject(object)
+    if State.Storage.ESPCache[object] then
+        if State.Storage.ESPCache[object].Highlight then
+            State.Storage.ESPCache[object].Highlight:Destroy()
+        end
+        if State.Storage.ESPCache[object].BoxFrame then
+            State.Storage.ESPCache[object].BoxFrame:Destroy()
+        end
+        if State.Storage.ESPCache[object].OutlineFrame then
+            State.Storage.ESPCache[object].OutlineFrame:Destroy()
+        end
+        State.Storage.ESPCache[object] = nil
+    end
+end
+
+local function cleanupStalePlayers()
+    for player in pairs(State.Storage.ESPCache) do
+        if not isValidPlayer(player) then
+            uncacheObject(player)
+        end
+    end
+end
+
+local function updatePlayerCache()
+    cleanupStalePlayers()
+    State.PlayersToDraw = {}
+    for _, player in pairs(getPlayers()) do
+        if isValidPlayer(player) and isEnemy(player) then
+            local torso = resolvePart(player, "Torso")
+            if torso then
+                local distanceToCamera = (torso.Position - Camera.CFrame.Position).Magnitude
+                if not Settings.ESP.MaxDistance.Enabled or distanceToCamera <= Settings.ESP.MaxDistance.Value then
+                    if not State.Storage.ESPCache[player] then
+                        cacheObject(player)
+                    end
+                    table.insert(State.PlayersToDraw, player)
+                else
+                    uncacheObject(player)
+                end
+            else
+                uncacheObject(player)
+            end
+        end
+    end
+end
+
+local function updateHighlight(player, cache)
+    if not Settings.ESP.Features.Highlight.Enabled or not cache.Highlight then
+        cache.Highlight.Enabled = false
+        return
+    end
+
+    cache.Highlight.Adornee = player
+    cache.Highlight.Enabled = true
+    
+    local anyPartVisible = false
+    
+    local partsToCheck = {
+        getHead(player),
+        resolvePart(player, "Torso"),
+        resolvePart(player, "Left Arm"), 
+        resolvePart(player, "Right Arm"),
+        resolvePart(player, "Left Leg"),
+        resolvePart(player, "Right Leg")
+    }
+    
+    for _, part in ipairs(partsToCheck) do
+        if part and isVisibleESP(part) then
+            anyPartVisible = true
+            break
+        end
+    end
+    
+    if Settings.ESP.Features.Highlight.VisibilityCheck then
+        if anyPartVisible then
+            cache.Highlight.FillColor = Settings.ESP.Features.Highlight.FillColor
+        else
+            cache.Highlight.FillColor = Settings.ESP.Features.Highlight.OccludedFillColor
+        end
+    else
+        cache.Highlight.FillColor = Settings.ESP.Features.Highlight.FillColor
+    end
+    
+    cache.Highlight.OutlineColor = Settings.ESP.Features.Highlight.OutlineColor
+    cache.Highlight.FillTransparency = Settings.ESP.Features.Highlight.FillTransparency
+    cache.Highlight.OutlineTransparency = Settings.ESP.Features.Highlight.OutlineTransparency
+end
+
+local function renderESP()
+    if not Settings.ESP.Enabled then 
+        for _, cache in pairs(State.Storage.ESPCache) do
+            if cache.BoxFrame then cache.BoxFrame.Visible = false end
+            if cache.OutlineFrame then cache.OutlineFrame.Visible = false end
+            if cache.Highlight then cache.Highlight.Enabled = false end
+        end
+        return 
+    end
+    
+    for _, player in ipairs(State.PlayersToDraw) do
+        local cache = State.Storage.ESPCache[player]
+        if not cache then continue end
+
+        local torso = resolvePart(player, "Torso")
+        
+        if not torso then
+            cache.BoxFrame.Visible = false
+            cache.OutlineFrame.Visible = false
+            if cache.Highlight then cache.Highlight.Enabled = false end
+            continue
+        end
+
+        local torsoPoint, onScreen = Camera:WorldToViewportPoint(torso.Position)
+        local visible = isVisibleESP(torso)
+        
+        updateHighlight(player, cache)
+
+        if not onScreen then
+            cache.BoxFrame.Visible = false
+            cache.OutlineFrame.Visible = false
+            continue
+        end
+
+        local distance = (torso.Position - Camera.CFrame.Position).Magnitude
+        local scale = 1000 / distance * 80 / Camera.FieldOfView
+        local width = math.floor(3 * scale)
+        local height = math.floor(4 * scale)
+        local position = Vector2.new(torsoPoint.X - width/2, torsoPoint.Y - height/2)
+
+        if Settings.ESP.Features.Box.Enabled then
+            cache.OutlineFrame.Visible = true
+            cache.OutlineFrame.Position = UDim2.new(0, position.X, 0, position.Y)
+            cache.OutlineFrame.Size = UDim2.new(0, width, 0, height)
+            
+            cache.BoxFrame.Visible = true
+            cache.BoxFrame.Position = UDim2.new(0, position.X, 0, position.Y)
+            cache.BoxFrame.Size = UDim2.new(0, width, 0, height)
+            
+            if Settings.ESP.Features.Box.GradientEnabled then
+                cache.UIGradient.Enabled = true
+                cache.UIGradient.Rotation = Settings.ESP.Features.Box.GradientRotation
+                cache.UIGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Settings.ESP.Features.Box.Color1),
+                    ColorSequenceKeypoint.new(1, Settings.ESP.Features.Box.Color2)
+                }
+                cache.UIStroke.Color = Color3.new(1,1,1)
+            else
+                cache.UIGradient.Enabled = false
+                if Settings.ESP.VisibilityCheck then
+                    if visible then
+                         cache.UIStroke.Color = Settings.ESP.Features.Box.Color1
+                    else
+                         cache.UIStroke.Color = Color3.new(1, 0, 0)
+                    end
+                else
+                    cache.UIStroke.Color = Settings.ESP.Features.Box.Color1
+                end
+            end
+        else
+            cache.BoxFrame.Visible = false
+            cache.OutlineFrame.Visible = false
+        end
+    end
+end
+
+local Modules = {}
+do
+    local Cache
+    if (getrenv and getrenv().shared) then
+        Cache = debug.getupvalue(getrenv().shared.require, 1)._cache
+    elseif getgc then
+        for _, Func in getgc() do
+            if ((typeof(Func) == "function") and (debug.info(Func, "n") == "require") and string.match(debug.info(Func, "s"), "ClientLoader")) then
+                Cache = debug.getupvalue(Func, 1)._cache
+                break
+            end
+        end
+    end
+    if not Cache then
+        Players.LocalPlayer:Kick("Make Sure The Game Is Loaded Or Your Executor Is Not Supported.")
+    end
+    local function Require(Module)
+        return Cache[Module].module
+    end
+    Modules.ReplicationInterface = Require("ReplicationInterface")
+    Modules.BulletInterface = Require("BulletInterface")
+    Modules.PublicSettings = Require("PublicSettings")
+end
+
+if (not Modules.ReplicationInterface or not Modules.BulletInterface or not Modules.PublicSettings) then
+    Players.LocalPlayer:Kick("Failed To Get One Of The Modules. Try Rejoining.")
+end
+
+local function PredictPosition(Origin, Target, BulletSpeed, Velocity)
+    local Distance = (Target - Origin).Magnitude
+    local TravelTime = Distance / BulletSpeed
+    local BulletDrop = 0.5 * workspace.Gravity * TravelTime ^ 2
+
+    return (Velocity * TravelTime) + Vector3.new(0, BulletDrop, 0)
+end
+
+local Functions = {}
+do
+    Functions.GetClosestToMouse = function(self)
+        local Closest, HitPart = SilentAim.Fov, nil
+        local mousePos = UserInputService:GetMouseLocation()
+        
+        local fovPosition
+        if Settings.FOV.FollowGun and not aiming then
+            local barrel = getGunBarrel()
+            if barrel then
+                local position, onScreen = Camera:WorldToViewportPoint(barrel.Position)
+                if onScreen then
+                    fovPosition = Vector2.new(position.X, position.Y)
+                end
+            end
+        end
+        fovPosition = fovPosition or Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+        
+        Modules.ReplicationInterface.operateOnAllEntries(function(Player, Entry)
+            if ((Player == Players.LocalPlayer) or (Player.Team == Players.LocalPlayer.Team)) then
+                return
+            end
+            if (not Entry._alive or not Entry._thirdPersonObject or not Entry._thirdPersonObject._characterModelHash) then
+                return
+            end
+            local HitBox = Entry._thirdPersonObject._characterModelHash[SilentAim.HitScan]
+            if not HitBox then
+                return
+            end
+            local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(HitBox.Position)
+            local Magnitude = (fovPosition - Vector2.new(ScreenPosition.X, ScreenPosition.Y)).Magnitude
+            
+            if (OnScreen and (Magnitude < Closest)) then
+                if PassesHitChance(SilentAim.HitScan) then
+                    Closest = Magnitude
+                    HitPart = HitBox
+                end
+            end
+        end)
+        return HitPart
+    end
+
+    Functions.SolveQuadratic = function(self, A, B, C)
+        local D = (B ^ 2) - (4 * A * C)
+        if (D < 0) then
+            return nil, nil
+        end
+        local s = math.sqrt(D)
+        return (-B - s) / (2 * A), (-B + s) / (2 * A)
+    end
+
+    Functions.GetBallisticFlightTime = function(self, dir, grav, vel)
+        local r1, r2 = Functions:SolveQuadratic(grav:Dot(grav) / 4, grav:Dot(dir) - (vel ^ 2), dir:Dot(dir))
+        if (r1 and r2) then
+            if ((r1 > 0) and (r1 < r2)) then
+                return math.sqrt(r1)
+            end
+            if ((r2 > 0) and (r2 < r1)) then
+                return math.sqrt(r2)
+            end
+        end
+        return 0
+    end
+
+    Functions.CalCulateBulletDrop = function(self, To, From, Vel)
+        local t = Functions:GetBallisticFlightTime(From - To, -Modules.PublicSettings.bulletAcceleration, Vel)
+        local v = 0.5 * -Modules.PublicSettings.bulletAcceleration * (t ^ 2)
+        return v
+    end
+end
+
+local OldBulletInterface = Modules.BulletInterface.newBullet
+Modules.BulletInterface.newBullet = function(BulletData)
+    if (BulletData.extra and SilentAim.Enabled) then
+        local HitPart = Functions:GetClosestToMouse()
+        if HitPart then
+            local Origin = BulletData.position
+            local BulletSpeed = BulletData.extra.firearmObject:getWeaponStat("bulletspeed")
+
+            local PredictedOffset = PredictPosition(
+                Origin,
+                HitPart.Position,
+                BulletSpeed,
+                HitPart.AssemblyLinearVelocity
+            )
+
+            local AimPosition = HitPart.Position + PredictedOffset
+            local LookVector = (AimPosition - Origin).Unit
+
+            for i, v in debug.getstack(2) do
+                if ((typeof(v) == "Vector3") and ((BulletData.velocity.Unit - v).Magnitude < 0.1)) then
+                    debug.setstack(2, i, LookVector)
+                    break
+                end
+            end
+
+            BulletData.velocity = LookVector * BulletSpeed
+        end
+    end
+    return OldBulletInterface(BulletData)
+end
+
+local DrawingFOV = Drawing.new("Circle")
+DrawingFOV.Thickness = 2
+DrawingFOV.NumSides = 64
+DrawingFOV.Filled = false
+DrawingFOV.Color = Color3.fromRGB(255, 255, 255)
+DrawingFOV.Transparency = 1
+DrawingFOV.Visible = false
+
+local function getDynamicFactor()
+    local charInterface = Modules.ReplicationInterface.getEntry(Players.LocalPlayer)
+    local cameraInterface = getrenv().shared.require("CameraInterface")
+    local factor = 1
+    if (charInterface and charInterface.isAlive and cameraInterface) then
+        factor = (not charInterface:isAlive() and 1) or (cameraInterface.getActiveCamera():getBaseFov() / Camera.FieldOfView)
+    end
+    return factor
+end
+
+local function CreateLocalBulletTracer(FirePosition, OriginalVelocity, BulletSpeed, Data)
+    if not Settings.BulletTracers.Local.Enabled then
+        return
+    end
+
+    local Direction = OriginalVelocity.Unit * (BulletSpeed > 0 and BulletSpeed or 1000)
+    local FinalPosition
+
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {
+        workspace.Terrain,
+        workspace.Ignore,
+        workspace.Players,
+        Camera,
+    }
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+    local RayResult = workspace:Raycast(FirePosition, Direction, raycastParams)
+    FinalPosition = RayResult and RayResult.Position or (FirePosition + Direction)
+
+    local TracerOrigin = FirePosition
+    
+    if Settings.BulletTracers.UseNewOrigin then
+        TracerOrigin = Data.position
+    end
+
+    Visuals:RenderBulletTracer(
+        TracerOrigin,
+        FinalPosition,
+        Settings.BulletTracers.Local.Lifetime,
+        Settings.BulletTracers.Local.ColorStart,
+        Settings.BulletTracers.Local.ColorEnd
+    )
+end
+
+local originalNetworkSend = network.send
+function network:send(name, ...)
+    if name == "fire" then
+        local args = {...}
+        if #args > 0 then
+            local data = args[1]
+            if data and data.position and data.velocity then
+                task.spawn(function()
+                    CreateLocalBulletTracer(data.position, data.velocity, data.extra and data.extra.firearmObject:getWeaponStat("bulletspeed") or 1000, data)
+                end)
+            end
+        end
+    end
+    return originalNetworkSend(self, name, ...)
+end
+
+Reciever:Connect(function(Method, ...)
+    if Method == 'newbullets' then
+        local BulletData = ...
+
+        local Shooter = BulletData.player
+        if Shooter and Settings.BulletTracers.Enemy.Enabled then
+            local FirePosition = BulletData.firepos
+
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {
+                workspace.Terrain,
+                workspace.Ignore,
+                workspace.Players,
+                Camera,
+            }
+            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+            for Index, Bullet in next, BulletData.bullets do
+                local RayResult = workspace:Raycast(
+                    FirePosition,
+                    Bullet.velocity.Unit * 400,
+                    raycastParams
+                )
+
+                local EndPosition = RayResult and RayResult.Position
+                    or (FirePosition + Bullet.velocity.Unit * 400)
+
+                Visuals:RenderBulletTracer(
+                    FirePosition,
+                    EndPosition,
+                    Settings.BulletTracers.Enemy.Lifetime,
+                    Settings.BulletTracers.Enemy.ColorStart,
+                    Settings.BulletTracers.Enemy.ColorEnd
+                )
+            end
+        end
+    end
+end)
+
+InputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        aiming = true
+        lastFollowGun = Settings.FOV.FollowGun
+        Settings.FOV.FollowGun = false
+    end
+end)
+
+InputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        aiming = false
+        if lastFollowGun then
+            Settings.FOV.FollowGun = lastFollowGun
+        end
+    end
+end)
+
+local updateScope = hudScopeInterface.updateScope
+function hudScopeInterface.updateScope(...)
+    if Settings.GunMods.NoScopeMovement then
+        local screenGui = unscaledScreenGui.getScreenGui()
+        local frontLayer = screenGui.DisplayScope.ImageFrontLayer
+        local rearLayer = screenGui.DisplayScope.ImageRearLayer
+
+        frontLayer.ImageTransparency = 1
+        rearLayer.ImageTransparency = 1
+
+        for i = 1, 2 do
+            local layer = (i == 1 and frontLayer or rearLayer)
+            for _, frame in layer:GetChildren() do
+                if frame.ClassName == "Frame" then
+                    frame.Visible = false
+                end
+            end
+        end
+    end
+
+    return updateScope(...)
+end
+
+local applyImpulse = recoil.applyImpulse
+function recoil.applyImpulse(...)
+    if Settings.GunMods.NoRecoil then
+        return
+    end
+    return applyImpulse(...)
+end
+
+local reload = firearmObject.reload
+function firearmObject:reload()
+    if Settings.GunMods.InstantReload then
+        if self._spareCount > 0 then
+            if self._spareCount >= self._weaponData.magsize then
+                self._spareCount = self._spareCount - (self._weaponData.magsize - self._magCount)
+                self._magCount = self._weaponData.magsize
+            else
+                self._magCount = self._spareCount
+                self._spareCount = 0
+            end
+            network:send("reload")
+            return
+        end
+    end
+    return reload(self)
+end
+
+RunService.RenderStepped:Connect(function()
+    updateFOVCirclePosition()
+    if Settings.ESP.Features.Crosshair.Enabled then
+        updateCrosshairPos()
+    end
+    
+    SilentAim.Fov = Settings.FOV.Radius
+    
+    if SilentAim.ShowFOV then
+        DrawingFOV.Visible = true
+        
+        local fovPosition
+        if Settings.FOV.FollowGun and not aiming then
+            local barrel = getGunBarrel()
+            if barrel then
+                local position, onScreen = Camera:WorldToViewportPoint(barrel.Position)
+                if onScreen then
+                    fovPosition = Vector2.new(position.X, position.Y)
+                end
+            end
+        end
+        fovPosition = fovPosition or Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+        
+        DrawingFOV.Position = fovPosition
+        DrawingFOV.Radius = SilentAim.Fov * getDynamicFactor()
+    else
+        DrawingFOV.Visible = false
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    updatePlayerCache()
+    renderESP()
+end)
+
+RunService.Heartbeat:Connect(function()
+    if Settings.ESP.Enabled then
+        cleanupStalePlayers()
+    end
+end)
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/gggasdsafhgdsasaddsagdsds-oss/estupro-de-crian-as-SIm-e-liberado/refs/heads/main/se%20eu%20fazer%20outro"))()
+local window = library:new({name = "Bbot", sub = ".rape"}); 
+local aimbot_page = window:page({name = "Combat"});
+do
+    local section = aimbot_page:section({name = "Settings", size = "auto", side = "left"}); 
+    do
+        section:dropdown({
+            name = "Aim Method",
+            options = {"Silent aim", "Aimbot"},
+            default = 1,
+            callback = function(text)
+                Settings.Aimbot.Enabled = false
+                SilentAim.Enabled = false
+
+                if State.InputBeganConnection then State.InputBeganConnection:Disconnect() State.InputBeganConnection = nil end
+                if State.InputEndedConnection then State.InputEndedConnection:Disconnect() State.InputEndedConnection = nil end
+                if State.RenderSteppedConnection then State.RenderSteppedConnection:Disconnect() State.RenderSteppedConnection = nil end
+
+                if text == "Aimbot" then
+                    Settings.Aimbot.Enabled = true
+                    startMousePreload()
+
+                    State.InputBeganConnection = UserInputService.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                            State.IsRightClickHeld = true
+                            State.TargetPart = getClosestPlayer()
+                        end
+                    end)
+
+                    State.InputEndedConnection = UserInputService.InputEnded:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                            State.IsRightClickHeld = false
+                            State.TargetPart = nil
+                        end
+                    end)
+
+                    State.RenderSteppedConnection = RunService.RenderStepped:Connect(function()
+                        if State.IsRightClickHeld then
+                            if not State.TargetPart or (Settings.Aimbot.AutoTargetSwitch and not isVisible(State.TargetPart)) then
+                                State.TargetPart = getClosestPlayer()
+                            end
+
+                            if State.TargetPart and (not Settings.Aimbot.WallCheck or isVisible(State.TargetPart)) then
+                                aimAt()
+                            end
+                        end
+                    end)
+
+                elseif text == "Silent aim" then
+                    SilentAim.Enabled = true
+                end
+            end
+        })
+
+        section:dropdown({
+            name = "(A) Hit Part",
+            options = {"Head", "Torso"},
+            default = 1,
+            callback = function(text)
+                Settings.Aimbot.HitPart = text
+            end
+        })
+
+        section:dropdown({
+            name = "(S) Hit Part",
+            options = {"Head", "Torso"},
+            default = 1,
+            callback = function(text)
+                SilentAim.HitScan = text
+            end
+        })
+
+        section:slider({
+            name = "(S) Head Chance",
+            min = 0,
+            max = 100,
+            float = 0.1,
+            suffix = "%",
+            default = 50,
+            callback = function(value)
+                HitChance.Head = value
+            end
+        })
+
+        section:slider({
+            name = "(S) Torso Chance",
+            min = 0,
+            max = 100,
+            float = 0.1,
+            suffix = "%",
+            default = 80,
+            callback = function(value)
+                HitChance.Torso = value
+            end
+        })
+
+        section:toggle({
+            name = "(A) Wall Check",
+            default = Settings.Aimbot.WallCheck,
+            callback = function(state)
+                Settings.Aimbot.WallCheck = state
+            end
+        })
+
+        section:toggle({
+            name = "(A) Auto Target Switch",
+            default = Settings.Aimbot.AutoTargetSwitch,
+            callback = function(state)
+                Settings.Aimbot.AutoTargetSwitch = state
+            end
+        })
+
+        section:slider({
+            name = "(A) Aim Speed",
+            min = 0,
+            max = 1.5,
+            float = 0.01,
+            suffix = "x",
+            default = Settings.Aimbot.Easing.Strength,
+            callback = function(value)
+                Settings.Aimbot.Easing.Strength = value
+                updateSensitivity(value)
+            end
+        })
+
+        section:toggle({
+            name = "(A) Max Distance",
+            default = Settings.Aimbot.MaxDistance.Enabled,
+            callback = function(state)
+                Settings.Aimbot.MaxDistance.Enabled = state
+            end
+        })
+
+        section:slider({
+            name = "(A) Max Distance Value",
+            min = 10,
+            max = 1000,
+            float = 1,
+            suffix = " studs",
+            default = Settings.Aimbot.MaxDistance.Value,
+            callback = function(value)
+                Settings.Aimbot.MaxDistance.Value = value
+            end
+        })
+    end
+
+    local gunmods_section = aimbot_page:section({name = "Gun Mods", size = "auto", side = "right"})
+
+    gunmods_section:toggle({
+        name = "No Recoil",
+        default = false,
+        callback = function(state)
+            Settings.GunMods.NoRecoil = state
+        end
+    })
+
+    gunmods_section:toggle({
+        name = "No Spread",
+        default = false,
+        callback = function(state)
+            Settings.GunMods.NoSpread = state
+        end
+    })
+
+    gunmods_section:toggle({
+        name = "Instant Reload",
+        default = false,
+        callback = function(state)
+            Settings.GunMods.InstantReload = state
+        end
+    })
+
+    gunmods_section:toggle({
+        name = "Remove Sniper scope",
+        default = false,
+        callback = function(state)
+            Settings.GunMods.NoScopeMovement = state
+        end
+    })
+
+    gunmods_section:toggle({
+        name = "Crosshair Lock",
+        default = false,
+        callback = function(state)
+            Settings.GunMods.CrosshairLock = state
+        end
+    })
+end
+
+local fov_section = aimbot_page:section({name = "FOV Circle", size = "auto", side = "right"}); 
+do
+    fov_section:toggle({
+        name = "FOV Enabled", 
+        default = Settings.FOV.Enabled, 
+        callback = function(state)
+            setFOVEnabled(state)
+        end
+    })
+
+    fov_section:slider({
+        name = "FOV Radius",
+        min = 0,
+        max = 500,
+        float = 1,
+        suffix = "px",
+        default = Settings.FOV.Radius,
+        callback = function(value)
+            Settings.FOV.Radius = value
+            Settings.FOV.Circle.Radius = value
+            Settings.FOV.OutlineCircle.Radius = value
+        end
+    })
+
+    fov_section:toggle({
+    name = "Follow Gun",
+    default = Settings.FOV.FollowGun,
+    callback = function(state)
+        Settings.FOV.FollowGun = state
+    end
+    })
+    
+    fov_section:toggle({
+        name = "Filled FOV",
+        default = Settings.FOV.Filled,
+        callback = function(state)
+            Settings.FOV.Filled = state
+            setFOVEnabled(Settings.FOV.Enabled)
+        end
+    })
+
+    fov_section:colorpicker({
+        name = "Fill Color",
+        default = Settings.FOV.FillColor,
+        callback = function(color)
+            Settings.FOV.FillColor = color
+            Settings.FOV.Circle.Color = color
+        end
+    })
+
+    fov_section:slider({
+        name = "Fill Transparency",
+        min = 0,
+        max = 1,
+        float = 0.01,
+        suffix = "",
+        default = Settings.FOV.FillTransparency,
+        callback = function(value)
+            Settings.FOV.FillTransparency = value
+            Settings.FOV.Circle.Transparency = value
+        end
+    })
+
+    fov_section:colorpicker({
+        name = "Outline Color",
+        default = Settings.FOV.OutlineColor,
+        callback = function(color)
+            Settings.FOV.OutlineColor = color
+            Settings.FOV.OutlineCircle.Color = color
+        end
+    })
+end
+
+local visuals_page = window:page({name = "Visuals"});
+
+do
+    local esp_section = visuals_page:section({name = "ESP Settings", size = "auto", side = "left"});
+
+    esp_section:toggle({
+        name = "Enabled",
+        default = Settings.ESP.Enabled,
+        callback = function(state)
+            Settings.ESP.Enabled = state
+        end
+    })
+
+    esp_section:toggle({
+        name = "Box",
+        default = Settings.ESP.Features.Box.Enabled,
+        callback = function(state)
+            Settings.ESP.Features.Box.Enabled = state
+        end
+    })
+
+    esp_section:toggle({
+        name = "Max Distance",
+        default = Settings.ESP.MaxDistance.Enabled,
+        callback = function(state)
+            Settings.ESP.MaxDistance.Enabled = state
+        end
+    })
+
+    esp_section:slider({
+        name = "Max Distance Value",
+        min = 10,
+        max = 1000,
+        float = 1,
+        suffix = " studs", 
+        default = Settings.ESP.MaxDistance.Value,
+        callback = function(value)
+            Settings.ESP.MaxDistance.Value = value
+        end
+    })
+
+    local highlight_section = visuals_page:section({name = "Highlight", size = "auto", side = "right"});
+
+    highlight_section:toggle({
+        name = "highlight Enabled",
+        default = Settings.ESP.Features.Highlight.Enabled,
+        callback = function(state)
+            Settings.ESP.Features.Highlight.Enabled = state
+        end
+    })
+
+    highlight_section:slider({
+        name = "Fill Transparency",
+        min = 0,
+        max = 1,
+        float = 0.1,
+        default = Settings.ESP.Features.Highlight.FillTransparency,
+        callback = function(value)
+            Settings.ESP.Features.Highlight.FillTransparency = value
+        end
+    })
+
+    highlight_section:slider({
+        name = "Outline Transparency",
+        min = 0,
+        max = 1,
+        float = 0.1,
+        default = Settings.ESP.Features.Highlight.OutlineTransparency,
+        callback = function(value)
+            Settings.ESP.Features.Highlight.OutlineTransparency = value
+        end
+    })
+    
+    local Flags_section = visuals_page:section({name = "Flags", size = "auto", side = "left"});
+
+    Flags_section:toggle({
+        name = "Visibility Check (B)",
+        default = Settings.ESP.VisibilityCheck,
+        callback = function(state)
+            Settings.ESP.VisibilityCheck = state
+        end
+    })
+
+   Flags_section:toggle({
+        name = "Visibility Check (C)",
+        default = Settings.ESP.Features.Highlight.VisibilityCheck,
+        callback = function(state)
+            Settings.ESP.Features.Highlight.VisibilityCheck = state
+        end
+    })
+
+    Flags_section:toggle({
+        name = "Gradient Box",
+        default = Settings.ESP.Features.Box.GradientEnabled,
+        callback = function(state)
+            Settings.ESP.Features.Box.GradientEnabled = state
+        end
+    })
+
+    Flags_section:slider({
+        name = "Gradient Rotation",
+        min = 0,
+        max = 360,
+        float = 1,
+        default = Settings.ESP.Features.Box.GradientRotation,
+        callback = function(value)
+            Settings.ESP.Features.Box.GradientRotation = value
+        end
+    })
+
+    local Colors_section = visuals_page:section({name = "Colors", size = "auto", side = "right"});
+
+    Colors_section:colorpicker({
+        name = "(C) Visible Fill",
+        default = Settings.ESP.Features.Highlight.FillColor,
+        callback = function(color)
+            Settings.ESP.Features.Highlight.FillColor = color
+        end
+    })
+
+    Colors_section:colorpicker({
+        name = "(C) Hidden Fill",
+        default = Settings.ESP.Features.Highlight.OccludedFillColor,
+        callback = function(color)
+            Settings.ESP.Features.Highlight.OccludedFillColor = color
+        end
+    })
+
+    Colors_section:colorpicker({
+        name = "(C) Outline",
+        default = Settings.ESP.Features.Highlight.OutlineColor,
+        callback = function(color)
+            Settings.ESP.Features.Highlight.OutlineColor = color
+        end
+    })
+
+    Colors_section:colorpicker({
+        name = "(B) First",
+        default = Settings.ESP.Features.Box.Color1,
+        callback = function(color)
+            Settings.ESP.Features.Box.Color1 = color
+        end
+    })
+
+    Colors_section:colorpicker({
+        name = "(B) Second",
+        default = Settings.ESP.Features.Box.Color2,
+        callback = function(color)
+            Settings.ESP.Features.Box.Color2 = color
+        end
+    })
+
+    local crosshair_section = visuals_page:section({name = "Crosshair", size = "auto", side = "left"});
+        do
+            crosshair_section:toggle({
+                name = "Crosshair",
+                default = Settings.ESP.Features.Crosshair.Enabled,
+                callback = function(state)
+                    setCrosshairEnabled(state)
+                end
+            })
+
+            crosshair_section:toggle({
+                name = "Follow Recoil",
+                default = Settings.ESP.Features.Crosshair.FollowRecoil,
+                callback = function(state)
+                    Settings.ESP.Features.Crosshair.FollowRecoil = state
+                end
+            })
+
+            crosshair_section:slider({
+                name = "X Space",
+                min = 0,
+                max = 50,
+                float = 1,
+                default = Settings.ESP.Features.Crosshair.XSpace,
+                callback = function(value)
+                    Settings.ESP.Features.Crosshair.XSpace = value
+                end
+            })
+
+            crosshair_section:slider({
+                name = "Y Space",
+                min = 0,
+                max = 50,
+                float = 1,
+                default = Settings.ESP.Features.Crosshair.YSpace,
+                callback = function(value)
+                    Settings.ESP.Features.Crosshair.YSpace = value
+                end
+            })
+
+            crosshair_section:slider({
+                name = "X Size",
+                min = 0,
+                max = 20,
+                float = 1,
+                default = Settings.ESP.Features.Crosshair.XSize,
+                callback = function(value)
+                    Settings.ESP.Features.Crosshair.XSize = value
+                end
+            })
+
+            crosshair_section:slider({
+                name = "Y Size",
+                min = 0,
+                max = 20,
+                float = 1,
+                default = Settings.ESP.Features.Crosshair.YSize,
+                callback = function(value)
+                    Settings.ESP.Features.Crosshair.YSize = value
+                end
+            })
+
+            crosshair_section:slider({
+                name = "Spin Speed",
+                min = 0,
+                max = 10,
+                float = 0.1,
+                default = Settings.ESP.Features.Crosshair.SpinSpeed,
+                callback = function(value)
+                    Settings.ESP.Features.Crosshair.SpinSpeed = value
+                end
+            })
+
+            crosshair_section:colorpicker({
+                name = "Color",
+                default = Settings.ESP.Features.Crosshair.Color,
+                callback = function(color)
+                    Settings.ESP.Features.Crosshair.Color = color
+                    cross1.Color = color
+                    cross2.Color = color
+                    cross3.Color = color
+                    cross4.Color = color
+                    crossdot.Color = color
+                end
+            })
+
+            crosshair_section:slider({
+                name = "Thickness",
+                min = 1,
+                max = 5,
+                float = 1,
+                default = Settings.ESP.Features.Crosshair.Thickness,
+                callback = function(value)
+                    Settings.ESP.Features.Crosshair.Thickness = value
+                    cross1.Thickness = value
+                    cross2.Thickness = value
+                    cross3.Thickness = value
+                    cross4.Thickness = value
+                    crossdot.Thickness = value
+                end
+            })
+        end
+
+    local tracers_section = visuals_page:section({name = "Bullet Tracers", size = "auto", side = "right"});
+        do
+            tracers_section:toggle({
+                name = "Local Tracers",
+                default = Settings.BulletTracers.Local.Enabled,
+                callback = function(state)
+                    Settings.BulletTracers.Local.Enabled = state
+                end
+            })
+
+            tracers_section:toggle({
+                name = "Enemy Tracers",
+                default = Settings.BulletTracers.Enemy.Enabled,
+                callback = function(state)
+                    Settings.BulletTracers.Enemy.Enabled = state
+                end
+            })
+
+            tracers_section:dropdown({
+                name = "Local Texture",
+                options = {"Default", "Sad Spongebob", "POW!", "Nothing"},
+                default = 2,
+                callback = function(text)
+                    Settings.BulletTracers.Local.Texture = text
+                end
+            })
+
+            tracers_section:dropdown({
+                name = "Enemy Texture",
+                options = {"Default", "Sad Spongebob", "POW!", "Nothing"},
+                default = 1,
+                callback = function(text)
+                    Settings.BulletTracers.Enemy.Texture = text
+                end
+            })
+
+            tracers_section:colorpicker({
+                name = "Local Start Color",
+                default = Settings.BulletTracers.Local.ColorStart,
+                callback = function(color)
+                    Settings.BulletTracers.Local.ColorStart = color
+                end
+            })
+
+            tracers_section:colorpicker({
+                name = "Local End Color",
+                default = Settings.BulletTracers.Local.ColorEnd,
+                callback = function(color)
+                    Settings.BulletTracers.Local.ColorEnd = color
+                end
+            })
+
+            tracers_section:colorpicker({
+                name = "Enemy Start Color",
+                default = Settings.BulletTracers.Enemy.ColorStart,
+                callback = function(color)
+                    Settings.BulletTracers.Enemy.ColorStart = color
+                end
+            })
+
+            tracers_section:colorpicker({
+                name = "Enemy End Color",
+                default = Settings.BulletTracers.Enemy.ColorEnd,
+                callback = function(color)
+                    Settings.BulletTracers.Enemy.ColorEnd = color
+                end
+            })
+
+            tracers_section:slider({
+                name = "Local Lifetime",
+                min = 0.1,
+                max = 5,
+                float = 0.1,
+                default = Settings.BulletTracers.Local.Lifetime,
+                callback = function(value)
+                    Settings.BulletTracers.Local.Lifetime = value
+                end
+            })
+
+            tracers_section:slider({
+                name = "Enemy Lifetime",
+                min = 0.1,
+                max = 5,
+                float = 0.1,
+                default = Settings.BulletTracers.Enemy.Lifetime,
+                callback = function(value)
+                    Settings.BulletTracers.Enemy.Lifetime = value
+                end
+            })
+
+            tracers_section:toggle({
+                name = "Use New Origin",
+                default = Settings.BulletTracers.UseNewOrigin,
+                callback = function(state)
+                    Settings.BulletTracers.UseNewOrigin = state
+                end
+            })
+        end
+    end
+
+    local Settings_Tab = window:page({name = "Settings"});
+
+    local Ui = Settings_Tab:section({name = "Keybinds", size = "auto", side = "right"});
+        Ui:keybind({
+            name = "Toggle UI",
+            default = Enum.KeyCode.RightShift,
+            callback = function()
+                library:set_open(not library.open)
+            end
+        })
+
+    game:GetService('StarterGui'):SetCore('SendNotification', {
+        Title = 'Bbot.Rape',
+        Text = 'Loaded Successfully! (If you are using bunni then kill your self and dont go to my discord and say "Why the script isnt working on bunni" KYS THE SCRIPT DONT HAVE SUPPORT ON BUNNI).. if you dont use bunni or another executor like volcano is ok gonna work',
+        Duration = 3,
+    })
